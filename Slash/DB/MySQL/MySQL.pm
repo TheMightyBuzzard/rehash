@@ -13352,7 +13352,7 @@ sub nickExists {
 # Feel free to use sqlDO in this section; upgrade methods are never
 # called from the UI, only from the update-database utility.
 
--sub upgradeCoreDB() {
+sub upgradeCoreDB() {
 
 	# Check the versions of stuff
 	my ($self, $upgrade) = @_;
