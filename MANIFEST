@@ -34,6 +34,10 @@ Slash/Custom/Bulkmail/Bulkmail.pm
 Slash/Custom/Bulkmail/MANIFEST
 Slash/Custom/Bulkmail/Makefile.PL
 Slash/Custom/Makefile.PL
+Slash/Cache/Cache.pm
+Slash/Cache/Makefile.PL
+Slash/Cache/Redis/Redis.pm
+Slash/Cache/Redis/Makefile.PL
 Slash/DB/Changes
 Slash/DB/DB.pm
 Slash/DB/MANIFEST

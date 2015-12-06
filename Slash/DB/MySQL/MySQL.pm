@@ -8543,6 +8543,54 @@ sub getMCD {
 	return $self->{_mcd};
 }
 
+sub getMCDNew {
+	my($self, $options) = @_;
+
+	my $constants;
+	# This is so we don't get errors in the log about $options->{no_getcurrentstatic} not being defined.
+	$options->{no_getcurrentstatic} ||= 0;
+
+	if ($options->{no_getcurrentstatic}) {
+		# If our caller needs getMCD because it's going to
+		# set up vars, we can't rely on getCurrentStatic.
+		# So get the vars we need directly.
+		# Do not fetch driver-specific flags like servers and debug.
+		# Do fetch cache_driver since we're going to have to anyway. Might as well use one query instead of two.
+		my @needed = qw( memcached memcached_keyprefix sitename cache_driver );
+		my $in_clause = join ",", map { $self->sqlQuote($_) } @needed;
+		$constants = $self->sqlSelectAllKeyValue(
+			"name, value",
+			"vars",
+			"name IN ($in_clause)");
+	} else {
+		$constants = getCurrentStatic();
+	}
+
+	# If we aren't using cache, return false
+	return 0 if !$constants->{memcached};
+
+	# If we already created it for this object, return that. 
+	# If we tried to create it and failed and assigned it 0 or have not tried to create it yet, continue on.
+	if(defined $self->{_mcd} && $self->{_mcd} != 0) {
+		return $self->{_mcd};
+	}
+
+	my $self->{_mcd} = getObject('Slash::Cache', { cache_driver => $constants->{cache_driver}, no_getcurrentstatic => $options->{no_getcurrentstatic}, db_object => $self } );
+	if(!$self->{_mcd}) {
+		$self->{_mcd} = 0;
+	}
+
+	if ($constants->{memcached_keyprefix}) {
+		$self->{_mcd_keyprefix} = $constants->{memcached_keyprefix};
+	} else {
+		# If no keyprefix defined in vars, use the first and
+		# last letter from the sitename.
+		$constants->{sitename} =~ /([A-Za-z]).*(\w)/;
+		$self->{_mcd_keyprefix} = ($2 ? lc("$1$2") : ($1 ? lc($1) : ""));
+	}
+	return $self->{_mcd};
+}
+
 ##################################################################
 # Extremely ugly but necessary if we want stats on memcached
 sub getMCDold {
@@ -13278,35 +13326,6 @@ sub getStoriesSince {
 
 	$limit = $limit ? 'LIMIT ' . $limit : '';
 
-	my $answer = $self->sqlSelectAllHashrefArray(
-		'primaryskid, submitter, title, time',
-		'stories, story_text, story_topics_rendered',
-			"stories.stoid = story_topics_rendered.stoid
-			AND stories.stoid = story_text.stoid
-			AND time > NOW()
-			AND story_topics_rendered.tid IN ($nexus_clause)
-			AND in_trash = 'no'",
-		"GROUP BY stories.stoid ORDER by time DESC $limit");
-	formatDate($answer, 'time', 'time', '%m/%d  %H:%M');
-
-	return $answer;
-}
-
-sub nickExists {
-	my ($self, $nick) = @_;
-
-	my $uid = $self->getUserUID($nick);
-	return 0 if (! defined($uid)) || isAnon($uid);
-	return 1;
-}
-
-##################################################################
-# Database upgrades to core go here, keep this right below the bottom
-#
-# Feel free to use sqlDO in this section; upgrade methods are never
-# called from the UI, only from the update-database utility.
-
-sub upgradeCoreDB() {
 	# Check the versions of stuff
 	my ($self, $upgrade) = @_;
 	my $schema_versions = $upgrade->getSchemaVersions();
