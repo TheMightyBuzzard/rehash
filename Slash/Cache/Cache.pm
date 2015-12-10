@@ -1,6 +1,5 @@
 package Slash::Cache;
 
-use strict;
 use warnings;
 use Slash::Utility;
 
@@ -12,8 +11,8 @@ my $drivers = {
 sub new {
 	my ($class, $options) = @_;
 
-	my $driver = $class->_getDriver($options->{cache_driver});
-	
+	my $driver = _getDriver($options->{cache_driver});
+
 	if(my $modname = $drivers->{$driver}) {
 		my $cacheClass = "Slash::Cache::$modname";
 		
@@ -28,18 +27,24 @@ sub new {
 		
 		my $self = getObject($cacheClass, $options);
 
-		return $self;
+		return bless $self, $cacheClass;
 	}
 	else {
 		my $supported = join(', ', keys(%$drivers));
-		print STDERR "driver $driver not supported! Supported drivers are: $supported.\n";
+		print STDERR "driver $options->{cache_driver} not supported! Supported drivers are: $supported.\n";
 		return undef;
 	}
 }
 
+sub isInstalled {
+	return 1;
+}
+
 sub _getDriver {
 	my ($self, $driver) = @_;
-	if($driver) { return $driver;}
+	if($driver) {
+		return $driver;
+	}
 	# default to the redis driver if none is specified
 	else { return 'redis'; }
 }

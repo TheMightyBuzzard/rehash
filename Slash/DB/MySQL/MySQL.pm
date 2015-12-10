@@ -6599,6 +6599,7 @@ sub getComments {
 #######################################################
 sub saveCommentReadLog {
 	my($self, $comments, $discussion_id, $uid) = @_;
+	return unless $comments;
 
 	$uid ||= getCurrentUser('uid');
 	return if isAnon($uid);
@@ -6614,6 +6615,7 @@ sub saveCommentReadLog {
 	}
 
 	# cache inserts?
+	print STDERR Dumper($comments)."comments\n";
 	for my $cid (@$comments) {
 		$self->sqlInsert('users_comments_read_log', {
 			uid            => $uid,
@@ -6624,7 +6626,7 @@ sub saveCommentReadLog {
 
 	if ($mcd) {
 		my $comments_read = $self->getCommentReadLog($discussion_id, $uid, 1);
-		$mcd->set($mcdkey, $comments_read) if $comments_read;
+		$mcd->set($mcdkey, $comments_read) if keys(%$comments_read);
 	}
 
 	1;
@@ -6649,15 +6651,16 @@ sub getCommentReadLog {
 	my $comments_read;
 	if ($mcd) {
 		$comments_read = $mcd->get($mcdkey);
+		print STDERR "comments_read: ".Dumper($comments_read)."\n".ref($comments_read)."\n";
 		return $comments_read if $comments_read;
 	}
 
-	$comments_read = $self->sqlSelectAllKeyValue(
+	$comments_read = %{$self->sqlSelectAllKeyValue(
 		'cid, 1',
 		'users_comments_read_log',
 		'uid=' . $self->sqlQuote($uid) .
 		' AND discussion_id=' . $self->sqlQuote($discussion_id)
-	) or return;
+	)} or return;
 
 	if ($mcd) {
 		$mcd->add($mcdkey, $comments_read);
@@ -8488,7 +8491,7 @@ sub getSlashConf {
 ##################################################################
 # It would be best to write a Slash::MemCached class, preferably as
 # a plugin, but let's just do this for now.
-sub getMCD {
+sub getMCDfast {
 	my($self, $options) = @_;
 
 	# If we already created it for this object, or if we tried to
@@ -8543,7 +8546,7 @@ sub getMCD {
 	return $self->{_mcd};
 }
 
-sub getMCDNew {
+sub getMCD {
 	my($self, $options) = @_;
 
 	my $constants;
@@ -8574,8 +8577,8 @@ sub getMCDNew {
 	if(defined $self->{_mcd} && $self->{_mcd} != 0) {
 		return $self->{_mcd};
 	}
-
-	my $self->{_mcd} = getObject('Slash::Cache', { cache_driver => $constants->{cache_driver}, no_getcurrentstatic => $options->{no_getcurrentstatic}, db_object => $self } );
+	
+	$self->{_mcd} = getObject('Slash::Cache', { cache_driver => $constants->{cache_driver}, no_getcurrentstatic => $options->{no_getcurrentstatic} } );
 	if(!$self->{_mcd}) {
 		$self->{_mcd} = 0;
 	}
@@ -8654,6 +8657,7 @@ sub getMCDold {
 ##################################################################
 sub getMCDStats {
 	my($self) = @_;
+	return 0; #debug purposes
 	my $mcd = $self->getMCDold();
 	return undef unless $mcd && $mcd->can("stats");
 
@@ -8672,6 +8676,7 @@ sub getMCDStats {
 }
 
 sub _getMCDStats_percentify {
+	return 0; #debug purposes
 	my($hr, $num, $denom, $dest) = @_;
 	my $perc = "-";
 	$perc = sprintf("%.1f", $hr->{$num}*100 / $hr->{$denom}) if $hr->{$denom};
@@ -11677,7 +11682,7 @@ sub _getUser_write_memcached {
 	my($self, $userdata) = @_;
 	my $uid = $userdata->{uid};
 	return unless $uid;
-	my $mcd = getMCD();
+	my $mcd = $self->getMCD();
 	return unless $mcd;
 	my $constants = getCurrentStatic();
 	my $mcddebug = $mcd && $constants->{memcached_debug};
