@@ -1035,3 +1035,50 @@ div.modalprefhelp {
         border-style: solid;
         border-width: 2px;
 }
+
+.commentTreeHider {
+	float:left;
+	margin-top: 0.45em;
+}
+.commentHider {
+	float:left;
+	margin-top: 0.45em;
+        margin-left: 0.45em;
+}
+.commentTreeHider:checked {
+}
+.commentHider:checked {
+}
+
+input.commentTreeHider:checked ~ input.commentHider {
+	display:none;
+}
+input.commentTreeHider ~ input.commentHider {
+	display:block;
+}
+
+input.commentHider ~ div.commentDiv div.commentBody, input.commentTreeHider ~ div.commentDiv div.commentBody {
+	display:block;
+}
+input.commentHider:checked ~ div.commentDiv div.commentBody, input.commentTreeHider:checked ~ div.commentDiv div.commentBody {
+	display:none;
+}
+input.commentHider ~ div.commentDiv div.commentSub, input.commentTreeHider ~ div.commentDiv div.commentSub {
+	display:block;
+}
+input.commentHider:checked ~ div.commentDiv div.commentSub, input.commentTreeHider:checked ~ div.commentDiv div.commentSub {
+	display:none;
+}
+input.commentHider ~ div.commentDiv div.commentTop div.details, input.commentTreeHider ~ div.commentDiv div.commentTop div.details {
+        display:block;
+}
+input.commentHider:checked ~ div.commentDiv div.commentTop div.details, input.commentTreeHider:checked ~ div.commentDiv div.commentTop div.details {
+        display:none;
+}
+
+input.commentTreeHider ~ ul {
+	display:block;
+}
+input.commentTreeHider:checked ~ ul {
+        display:none;
+}

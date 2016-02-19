@@ -25,6 +25,7 @@ dispComment
 __template__
 [% IF !options.noshow_show %]
 <li id="tree_[% cid %]" class="comment">
+<input type="checkbox" class="commentTreeHider"><input type="checkbox" class="commentHider">
 <div id="comment_status_[% cid %]" class="commentstatus"></div>
 <div id="comment_[% cid %]" class="commentDiv score[% points.length ? points : "?" %]">
 [% END; IF !options.noshow %]
