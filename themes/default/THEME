@@ -322,6 +322,7 @@ css=../april1/htdocs/april1.cssraw
 template=../april1/templates/html-header;misc;april1
 image=../april1/htdocs/images/underconstruction.gif
 image=../april1/htdocs/images/backgroundstars.gif
+image=../april1/htdocs/images/logo_april1.png
 
 misc=misc/spamarmors
 

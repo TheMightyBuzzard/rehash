@@ -3,6 +3,28 @@ body{
     background-attachment: fixed;
 ;
   }
+#links div.content {
+	background: #fe0;
+}
+.article .body, .search-results .intro, .search-results .authori, .commentBody, .commentSub, #commentwrap, .commentBoxForm {
+	background: #fe0;
+}
+#navigation-content ul ul {
+	background: #fe0;
+}
+#slashboxes div.content {
+	background: #fe0;
+}
+.generaltitle div.title, .article div.title, .search-results h4 {
+	background: linear-gradient(#0c0, #c0c);
+}
+.commentTop .title {
+	background: linear-gradient(#0c0, #c0c);
+}
+.commentBox {
+	background: linear-gradient(#0c0, #c0c);
+}
+
 #topnav
   {
     height: 100px;	
@@ -41,7 +63,7 @@ body{
     text-decoration-color:  none !important;;
     text-decoration-line: none !important;;
     text-decoration-style: none !important;;
-	  background: url("[% constants.imagedir %]/logo_soylentnews.png") no-repeat !important;
+	  background: url("[% constants.imagedir %]/logo_april1.png") no-repeat !important;
   }
 @-moz-keyframes scroll-left {
     0%   { -moz-transform: translateX(100%); }
