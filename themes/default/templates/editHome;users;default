@@ -59,6 +59,7 @@ __template__
 			'vt100'	=> 'VT100',
 			'vt220' => 'VT220',
 			'grayscale' => 'Grayscale'
+			'april1' => 'April1'
 		}, user_edit.skin, 1);
 		%]
 		<label>
