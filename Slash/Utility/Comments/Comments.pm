@@ -1831,7 +1831,8 @@ sub dispComment {
                 is_anon         => isAnon($comment->{uid}),
                 options         => $options,
                 cid_now         => $dim->{cid_now},
-                subscriber_badge => $subscriber_badge
+                subscriber_badge => $subscriber_badge,
+		children	=> $comment->{children},
 	};
 	$return = dispCommentNoTemplate($args);
 
@@ -2326,7 +2327,7 @@ sub dispCommentNoTemplate {
 			"<div id=\"comment_below_$args->{cid}\" class=\"commentbt commentDiv\"><div class=\"commentTop\"><div class=\"title\"><h4>Comment Below Threshold</h4></div></div></div>\n";
 		}
 
-		if($user->{mode} ne 'flat' && $args->{comment}->{children}) {
+		if($user->{mode} ne 'flat' && $args->{children}) {
 			my $checked = "";
 			if($user->{mode} eq 'thread-tos') { $checked = "checked"; }
 			$html_out .= "<input id=\"commentTreeHider_$args->{cid}\" type=\"checkbox\" class=\"commentTreeHider\" autocomplete=\"off\" $checked />\n";
