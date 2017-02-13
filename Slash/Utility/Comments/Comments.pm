@@ -1020,7 +1020,7 @@ sub printComments {
 		if($mode eq 'flat') {
 			($comments, $pages, $count) = selectCommentsFlat($discussion, $cidorpid, $sco);
 		}
-		elsif($mode eq 'thread') {
+		elsif($mode eq 'thread' || $mode eq 'thread-tng' || $mode eq 'thread-tos') {
 			($comments, $pages, $count) = selectCommentsNew($discussion, $cidorpid, $sco);
 		}
 		else {
@@ -1294,15 +1294,6 @@ sub displayThread {
 
 		$return .= "$const->{commentend}" if $finish_list;
 		$return .= "$const->{fullcommentend}" if ($full  && $user->{mode} ne 'flat');
-
-		# This is unnecessary as we only pull the comments we're gonna display now
-		#if( ($displayed >= $user->{commentlimit}) && ($user->{mode} eq "flat") ){
-		#	last;
-		#}
-		#if( ($displayed >= $user->{commentlimit}) && ($user->{mode} eq "thread") ){
-		#	last;
-		#}
-		
 	}
 
 	return $return;
@@ -1724,6 +1715,11 @@ sub dispComment {
 	my $gSkin = getCurrentSkin();
 	my $maxcommentsize = $constants->{default_maxcommentsize};
 
+	# Shortcut for TOS style below threshold
+	#if(($user->{mode} eq 'thread-tos') && ($comment->{points} < $user->{threshold}) && ($comment->{points} < $user->{highlightthresh})) {
+	#	return "<li id=\"tree_$args->{cid}\" class=\"comment\">\n<b>Comment Below Threshold</b>";
+	#}
+
 	my $comment_shrunk;
 
 	if ($form->{mode} ne 'archive'
@@ -1765,7 +1761,7 @@ sub dispComment {
 
 	my $can_mod = _can_mod($comment);
 
-	# don't inherit these ...
+	# do not inherit these ...
 	# THIS DOES NOT DO THAT, RETARD --TMB
 
 	# ipid/subnetid need munging into one text string
@@ -2319,6 +2315,7 @@ sub dispCommentNoTemplate {
 	my $show = 0;
 
 	if(defined($form->{cid}) && $form->{cid} == $args->{cid}) { $show = 1; }
+	if($user->{highlightthresh} >= $args->{points} { $show = 1; }
 	if($user->{uid} == $args->{uid} && !$user->{is_anon}) { $show = 1; }
 	
 	# Now shit starts getting squirrely.
@@ -2329,8 +2326,10 @@ sub dispCommentNoTemplate {
 			"<div id=\"comment_below_$args->{cid}\" class=\"commentbt commentDiv\"><div class=\"commentTop\"><div class=\"title\"><h4>Comment Below Threshold</h4></div></div></div>\n";
 		}
 
-		if($user->{mode} ne 'flat') {
-			$html_out .= "<input id=\"commentTreeHider_$args->{cid}\" type=\"checkbox\" class=\"commentTreeHider\" autocomplete=\"off\" />\n";
+		if($user->{mode} ne 'flat' && $args->{comment}->{children}) {
+			my $checked = "";
+			if($user->{mode} eq 'thread-tos') { $checked = "checked"; }
+			$html_out .= "<input id=\"commentTreeHider_$args->{cid}\" type=\"checkbox\" class=\"commentTreeHider\" autocomplete=\"off\" $checked />\n";
 		}
 
 		$html_out .= "<input id=\"commentHider_$args->{cid}\" type=\"checkbox\" class=\"commentHider\" ";
