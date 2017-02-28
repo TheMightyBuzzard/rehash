@@ -6385,10 +6385,10 @@ sub getFlatCommentsForUser {
 			$temphr->{$C->{cid}} = $C;
 		}
 		
-		foreach my $C (keys %$temphr) {
-			next if $C->{children} != 0;
+		foreach my $Cid (keys %$temphr) {
+			next if $temphr->{$Cid}->{children} != 0;
 			my $tempcomments = [];
-			my $walker = $C;
+			my $walker = $temphr->{$Cid};
 			while(1) {
 				push(@$tempcomments, $walker);
 				last if $walker->{pid} == 0;
@@ -6447,12 +6447,12 @@ sub getCommentsForUser {
 	my $where = "sid=$sid_quoted";
 
 	if ($cid && $one_cid_only) {
-		$where .= "AND cid=$cid";
+		$where .= "AND comments.cid=$cid";
 	} elsif ($user->{hardthresh}) {
 		my $threshold_q = $self->sqlQuote($user->{threshold});
 		$where .= "AND (comments.points >= $threshold_q";
 		$where .= "  OR comments.uid=$user->{uid}"	unless $user->{is_anon};
-		$where .= "  OR cid=$cid"			if $cid;
+		$where .= "  OR comments.cid=$cid"			if $cid;
 		$where .= ")";
 	}
 

@@ -1351,7 +1351,8 @@ sub editStory {
 	my $authors = $slashdb->getDescriptions('authors', '', 1);
 	$authors->{$storyref->{uid}} = $slashdb->getUser($storyref->{uid}, 'nickname') if $storyref->{uid} && !defined($authors->{$storyref->{uid}});
 	my $author_select = createSelect('uid', $authors, $storyref->{uid}, 1);
-
+	
+	$storyref->{dept} = "" if !defined($storyref->{dept});
 	$storyref->{dept} =~ s/ /-/gi;
 
 	$locktest = lockTest($storyref->{title});
@@ -1367,6 +1368,8 @@ sub editStory {
 
 	my $last_admin_text = $slashdb->getLastSessionText($user->{uid});
 	my $lasttime = $slashdb->getTime();
+	$last_admin_text = "" if !defined($last_admin_text);
+	$storyref->{title} = "" if !defined($storyref->{title});
 	$slashdb->setUser($user->{uid}, { adminlaststorychange => $lasttime }) if $last_admin_text ne $storyref->{title};
 	$slashdb->setSession($user->{uid}, {
 		lasttitle	=> $storyref->{title},
