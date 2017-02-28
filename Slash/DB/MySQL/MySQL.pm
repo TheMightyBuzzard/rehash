@@ -6392,7 +6392,7 @@ sub getFlatCommentsForUser {
 			while(1) {
 				push(@$tempcomments, $walker);
 				last if $walker->{pid} == 0;
-				$walker = $C->{$walker->{pid}};
+				$walker = $temphr->{$Cid}->{$walker->{pid}};
 				last if $walker->{cid} == $cid;
 			}
 			if($walker->{pid} == 0 && $walker->{cid} != $cid) {
