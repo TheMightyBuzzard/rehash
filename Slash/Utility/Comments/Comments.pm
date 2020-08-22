@@ -29,6 +29,7 @@ use Slash::Utility::Environment;
 use Slash::Display;
 use Slash::Hook;
 use Slash::Constants qw(:strip :people :messages);
+use Text::Fuzzy;
 
 use base 'Exporter';
 
@@ -1416,6 +1417,15 @@ sub preProcessComment {
 	my $tempSubject = $comm->{postersubj};
 	my $tempComment = $comm->{postercomment};
 
+	# automated, permanent banning of an ipid based on content of a message.
+	# APK-troll can eat a dick. -- TMB
+	
+	if(checkDouchebaggery($comm->{postercomment}))
+	{
+		$$error_message = getError('douchebag_error');
+		return -1;
+	}
+
 	$comm->{anon} = $user->{is_anon};
 	if ($comm->{postanon}
 		&& $reader->checkAllowAnonymousPosting
@@ -1923,6 +1933,111 @@ sub dispComment {
 		visiblenopass	=> $return->{visiblenopass},
 	};
 	return $newreturn;
+}
+
+##################################################################
+# Check for douchebaggery of the first order that the ipid should be
+# automatically and permanently banned for. This should be used
+# before anything is actually entered into the db for maximum effect.
+sub checkDouchebaggery {
+	my ($comment) = @_;
+	my $constants = getCurrentStatic();
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+
+	# Sanitize unicode, whitespace, html entities, etc...
+	my $normalized = _douchebaggeryNormalizeComment($comment);
+	my $normalizedchunks = int(length($normalized) / 32);
+	
+	# Split $normalized for individual word checking
+	my $words = {};
+	foreach my $word (split(/ /, $normalized)) {
+		$words->{lc($word)} = 1;
+	}
+	my $wc = scalar(keys(%$words));
+	
+	# Check for posts containing 2/3 (rounded) of the words in @$badlist
+	my $wordlists = $reader->sqlSelectAllHashrefArray("*", "douchebaggerylists");
+	if(scalar(@$wordlists) != 0) {
+		foreach my $badlist (@$wordlists) {
+			my $badcount = 0;
+			next unless (defined($badlist->{enabled}) && $badlist->{enabled} == 1);
+			my @badwords = split(/,/, lc($badlist->{words}));
+			my $threshold = sprintf( "%.0f", scalar(@$wordlist) * 2 / 3);
+			foreach my $badword (@badwords) {
+				return 1 if $badcount >= $threshold;
+				if($normalized =~ /\Q$badword/) {
+					$badcount++;
+				}
+			}
+			return 1 if $badcount >= $threshold;
+		}
+	}
+
+	# Check for percent similarity between this comment and an example comment
+	my $badexamples = $reader->sqlSelectAllHashrefArray("*", "douchebaggerytext");
+	return 0 if scalar(@$badexamples) == 0;
+	foreach my $badexample (@$badexamples) {
+		next unless (defined($badexample->{enabled}) && $badexample->{enabled} == 1);
+		my $exampletext = _douchebaggeryNormalizeComment($badexample->{text});
+		if(((length($normalized) || 1) / (length($exampletext) || 1)) > 1.2 ||
+			((length($normalized) || 1) / (length($exampletext) || 1)) < 0.8) {
+			next;
+		}
+		my @bechunks = $exampletext =~ /(.{1,32})/gs;
+		my ($badchunks, $checked) = (0, 0);
+		foreach my $chunk (@bechunks) {
+			if($badchunks > (scalar(@normalizedchunks) / 4) || $checked > ((scalar(@badchunks) * 3) / 4)) {
+				return 1;
+          	}
+			if($normalized =~ /\Q$chunk/is){
+               	$badchunks++;
+               	$checked++;
+               	next;
+	          }
+			else {
+				my $fuzzy = Text::Fuzzy->new($chunk);
+               	my $distance = $fuzzy->distance($normalized);
+	               if($distance < (length($normalized) - 15)){
+     	               $badchunks++;
+          	          $checked++;
+               	     next;
+	               }
+			}
+		}
+		if($badchunks > ($normalizedchunks / 4)) {
+			return 1;
+		}
+	}
+
+	
+	return 0;
+}
+
+sub _douchebaggeryNormalizeComment {
+	my ($sanitized) = @_;
+	$sanitized =~ s/^\v+//;
+     $sanitized =~ s/\v+$//;
+     $sanitized =~ s/\h/ /g;
+     $sanitized =~ s/<p>/\n/ig;
+     $sanitized =~ s/\v+/\n/gs;
+     $sanitized =~ s/ +/ /g;
+     $sanitized =~ s/&[[:alpha:]]+;//g;
+     $sanitized =~ s/&[[:digit:]]+;//g;
+     $sanitized =~ s/&#[a-zA-Z0-9]+;//g;
+     $sanitized =~ s/(.)/_douchebaggeryStripUnicode($1)/ge;
+     $sanitized = lc(strip_nohtml($sanitized));
+     $sanitized =~ s/^(?:\h|\v)+//;
+	$sanitized =~ s/(?:\h|\v)+$//;
+	return $sanitized;
+}
+
+sub _douchebaggeryStripUnicode {
+	my $character = shift;
+	my $decimal = ord($character);
+	if ($decimal > 255) {
+		return "";
+	}
+	return $character;
 }
 
 ##################################################################
