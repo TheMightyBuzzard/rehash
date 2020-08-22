@@ -13600,14 +13600,6 @@ sub nickExists {
 	return 1;
 }
 
-sub getDouchebagWordlists {
-	
-}
-
-sub getDouchebagComments {
-
-}
-
 ##################################################################
 # Database upgrades to core go here, keep this right below the bottom
 #
