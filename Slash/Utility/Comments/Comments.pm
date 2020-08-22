@@ -1953,8 +1953,7 @@ sub checkDouchebaggery {
 	foreach my $word (split(/ /, $normalized)) {
 		$words->{lc($word)} = 1;
 	}
-	my $wc = scalar(keys(%$words));
-	
+
 	# Check for posts containing 2/3 (rounded) of the words in @$badlist
 	my $wordlists = $reader->sqlSelectAllHashrefArray("*", "douchebaggerylists");
 	if(scalar(@$wordlists) != 0) {
@@ -1965,7 +1964,7 @@ sub checkDouchebaggery {
 			my $threshold = sprintf( "%.0f", scalar(@$wordlist) * 2 / 3);
 			foreach my $badword (@badwords) {
 				return 1 if $badcount >= $threshold;
-				if($normalized =~ /\Q$badword/) {
+				if(defined($words->{$badword}) && ($words->{$badword} == 1) {
 					$badcount++;
 				}
 			}
