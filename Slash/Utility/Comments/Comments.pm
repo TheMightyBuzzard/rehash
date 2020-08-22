@@ -1987,19 +1987,19 @@ sub checkDouchebaggery {
 		foreach my $chunk (@bechunks) {
 			if($badchunks > (scalar(@normalizedchunks) / 4) || $checked > ((scalar(@badchunks) * 3) / 4)) {
 				return 1;
-          	}
+	     	}
 			if($normalized =~ /\Q$chunk/is){
-               	$badchunks++;
-               	$checked++;
-               	next;
+	          	$badchunks++;
+	          	$checked++;
+	          	next;
 	          }
 			else {
 				my $fuzzy = Text::Fuzzy->new($chunk);
-               	my $distance = $fuzzy->distance($normalized);
+	          	my $distance = $fuzzy->distance($normalized);
 	               if($distance < (length($normalized) - 15)){
-     	               $badchunks++;
-          	          $checked++;
-               	     next;
+		               $badchunks++;
+	     	          $checked++;
+	          	     next;
 	               }
 			}
 		}
@@ -2014,18 +2014,15 @@ sub checkDouchebaggery {
 
 sub _douchebaggeryNormalizeComment {
 	my ($sanitized) = @_;
-	$sanitized =~ s/^\v+//;
-     $sanitized =~ s/\v+$//;
-     $sanitized =~ s/\h/ /g;
-     $sanitized =~ s/<p>/\n/ig;
-     $sanitized =~ s/\v+/\n/gs;
-     $sanitized =~ s/ +/ /g;
-     $sanitized =~ s/&[[:alpha:]]+;//g;
-     $sanitized =~ s/&[[:digit:]]+;//g;
-     $sanitized =~ s/&#[a-zA-Z0-9]+;//g;
-     $sanitized =~ s/(.)/_douchebaggeryStripUnicode($1)/ge;
-     $sanitized = lc(strip_nohtml($sanitized));
-     $sanitized =~ s/^(?:\h|\v)+//;
+	$sanitized =~ s/<p>/\n/ig;
+	$sanitized =~ s/\v+/\n/gs;
+	$sanitized =~ s/&[[:alpha:]]+;//g;
+	$sanitized =~ s/&[[:digit:]]+;//g;
+	$sanitized =~ s/&#[a-zA-Z0-9]+;//g;
+	$sanitized =~ s/(.)/_douchebaggeryStripUnicode($1)/ge;
+	$sanitized = lc(strip_nohtml($sanitized));
+	$sanitized =~ s/\h+/ /g;
+	$sanitized =~ s/^(?:\h|\v)+//;
 	$sanitized =~ s/(?:\h|\v)+$//;
 	return $sanitized;
 }
