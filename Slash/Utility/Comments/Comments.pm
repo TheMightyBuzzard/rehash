@@ -1944,6 +1944,10 @@ sub checkDouchebaggery {
 	my $constants = getCurrentStatic();
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 
+	# Shortcut to bad if there are too many ampsersands
+	my $ands = () = $comment =~ /&/g;
+	return 1 if $ands > 50;
+
 	# Sanitize unicode, whitespace, html entities, etc...
 	my $normalized = _douchebaggeryNormalizeComment($comment);
 	my $normalizedchunks = int(length($normalized) / 32);
