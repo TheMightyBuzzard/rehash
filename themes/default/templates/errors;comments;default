@@ -263,7 +263,7 @@ Can't find the comment in the database. Either it was deleted (unlikely) or some
 Internal SAN check blew up checking moderation rights. Please let the powers that be know how and where you recieved this error.
 
 [% CASE 'douchebag_error' %]
-The douchebaggery level of this comment exceeds site maximum and your ipid ([% user.ipid %]) has been banned. If you believe you've received this message in error, feel free to discuss it with [% constants.adminmail_post || constants.adminmail %]. Have a nice day.
+The douchebaggery level of this comment exceeds site maximum and your ipid ([% user.ipid %]) has been banned. If you believe you've received this message in error, feel free to discuss it with [% constants.adminmail_post || constants.adminmail %], making sure to include the ipid that was banned. Have a nice day.
 
 [% CASE %]
 An unexpected error has occurred: [% value %]

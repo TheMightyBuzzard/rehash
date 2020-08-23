@@ -13805,19 +13805,31 @@ sub upgradeCoreDB() {
 
 	if ($core_ver < 6) {
 		print "Upgrading Core to v6 ...\n";
-		print "Running: CREATE TABLE douchebaggerylists ('list_id' INT UNSIGNED NOT NULL AUTO_INCREMENT, 'words' TEXT NULL, 'enabled' TINYINT(3) NOT NULL DEFAULT 0, PRIMARY KEY 'list_id') ENGINE=ndbcluster DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci\n"
-		if(!$self->sqlDo("CREATE TABLE douchebaggerylists ('list_id' INT UNSIGNED NOT NULL AUTO_INCREMENT,
-						'words' TEXT NULL,
-						'enabled' TINYINT(3) NOT NULL DEFAULT 0,
-						PRIMARY KEY 'list_id')
+		print "Running: CREATE TABLE dbaglists (list_id INT UNSIGNED NOT NULL AUTO_INCREMENT, words TEXT NULL, enabled TINYINT(3) NOT NULL DEFAULT 0, PRIMARY KEY (list_id)) ENGINE=ndbcluster DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci\n"
+		if(!$self->sqlDo("CREATE TABLE dbaglists (list_id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+						words TEXT NULL,
+						enabled TINYINT(3) NOT NULL DEFAULT 0,
+						PRIMARY KEY (list_id))
 						ENGINE=ndbcluster DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci")) {
 			return 0;
 		}
-		print "Running: CREATE TABLE douchebaggerytext ('text_id' INT UNSIGNED NOT NULL AUTO_INCREMENT, 'text' TEXT NULL, 'enabled' TINYINT(3) NOT NULL DEFAULT 0, PRIMARY KEY 'text_id') ENGINE=ndbcluster DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci\n"
-		if(!$self->sqlDo("CREATE TABLE douchebaggerytext ('text_id' INT UNSIGNED NOT NULL AUTO_INCREMENT,
-						'text' TEXT NULL,
-						'enabled' TINYINT(3) NOT NULL DEFAULT 0,
-						PRIMARY KEY 'text_id')
+		print "Running: CREATE TABLE dbagtext (text_id INT UNSIGNED NOT NULL AUTO_INCREMENT, text TEXT NULL, enabled TINYINT(3) NOT NULL DEFAULT 0, PRIMARY KEY (text_id)) ENGINE=ndbcluster DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci\n"
+		if(!$self->sqlDo("CREATE TABLE dbagtext (text_id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+						text TEXT NULL,
+						enabled TINYINT(3) NOT NULL DEFAULT 0,
+						PRIMARY KEY (text_id))
+						ENGINE=ndbcluster DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci")) {
+			return 0;
+		}
+		print "Running: CREATE TABLE dbaglog (id INT UNSIGNED NOT NULL AUTO_INCREMENT, ts DATETIME NOT NULL DEFAULT NOW(), type VARCHAR(8) NOT NULL, ipid TEXT NOT NULL, type_id INT UNSIGNED NULL, comment TEXT NOT NULL, normalized TEXT NULL,PRIMARY KEY (id)) ENGINE=ndbcluster DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci\n";
+		if(!$self->sqlDo("CREATE TABLE dbagtext (id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+						ts DATETIME NOT NULL DEFAULT NOW(),
+						type VARCHAR(8) NOT NULL,
+						ipid TEXT NOT NULL,
+						type_id INT UNSIGNED NULL,
+						comment TEXT NOT NULL,
+						normalized TEXT NULL,
+						PRIMARY KEY (id))
 						ENGINE=ndbcluster DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci")) {
 			return 0;
 		}

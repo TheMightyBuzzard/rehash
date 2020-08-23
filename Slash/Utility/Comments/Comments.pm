@@ -1942,11 +1942,15 @@ sub dispComment {
 sub checkDouchebaggery {
 	my ($comment) = @_;
 	my $constants = getCurrentStatic();
+	my $user = getCurrentUser();
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 
 	# Shortcut to bad if there are too many ampsersands
 	my $ands = () = $comment =~ /&/g;
-	return 1 if $ands > 50;
+	if($ands > 50) {
+		_logDbag("ands", $user->{ipid}, "", $comment, "");
+		return 1;
+	}
 
 	# Sanitize unicode, whitespace, html entities, etc...
 	my $normalized = _douchebaggeryNormalizeComment($comment);
@@ -1959,7 +1963,7 @@ sub checkDouchebaggery {
 	}
 
 	# Check for posts containing 2/3 (rounded) of the words in @$badlist
-	my $wordlists = $reader->sqlSelectAllHashrefArray("*", "douchebaggerylists");
+	my $wordlists = $reader->sqlSelectAllHashrefArray("*", "dbaglists");
 	if(scalar(@$wordlists) != 0) {
 		foreach my $badlist (@$wordlists) {
 			my $badcount = 0;
@@ -1967,17 +1971,23 @@ sub checkDouchebaggery {
 			my @badwords = split(/,/, lc($badlist->{words}));
 			my $threshold = sprintf( "%.0f", scalar(@$wordlist) * 2 / 3);
 			foreach my $badword (@badwords) {
-				return 1 if $badcount >= $threshold;
+				if($badcount >= $threshold) {
+					_logDbag("list", $user->{ipid}, $badexample->{list_id}, $comment, $normalized);
+					return 1;
+				}
 				if(defined($words->{$badword}) && ($words->{$badword} == 1) {
 					$badcount++;
 				}
 			}
-			return 1 if $badcount >= $threshold;
+			if($badcount >= $threshold) {
+				_logDbag("list", $user->{ipid}, $badexample->{list_id}, $comment, $normalized);
+				return 1;
+			}
 		}
 	}
 
 	# Check for percent similarity between this comment and an example comment
-	my $badexamples = $reader->sqlSelectAllHashrefArray("*", "douchebaggerytext");
+	my $badexamples = $reader->sqlSelectAllHashrefArray("*", "dbagtext");
 	return 0 if scalar(@$badexamples) == 0;
 	foreach my $badexample (@$badexamples) {
 		next unless (defined($badexample->{enabled}) && $badexample->{enabled} == 1);
@@ -1990,6 +2000,7 @@ sub checkDouchebaggery {
 		my ($badchunks, $checked) = (0, 0);
 		foreach my $chunk (@bechunks) {
 			if($badchunks > (scalar(@normalizedchunks) / 4) || $checked > ((scalar(@badchunks) * 3) / 4)) {
+				_logDbag("text", $user->{ipid}, $badexample->{text_id}, $comment, $normalized);
 				return 1;
 	     	}
 			if($normalized =~ /\Q$chunk/is){
@@ -2008,6 +2019,7 @@ sub checkDouchebaggery {
 			}
 		}
 		if($badchunks > ($normalizedchunks / 4)) {
+			_logDbag("text", $user->{ipid}, $badexample->{text_id}, $comment, $normalized);
 			return 1;
 		}
 	}
@@ -2038,6 +2050,21 @@ sub _douchebaggeryStripUnicode {
 		return "";
 	}
 	return $character;
+}
+
+sub _logDbag {
+	my ($type, $ipid, $type_id, $comment, $normalized) = @_;
+	my $writer = getCurrentDB();
+	my $data = {
+		type			=> $type,
+		ipid			=> $ipid,
+		type_id		=> $type_id,
+		comment		=> $comment,
+		normalized	=> $normalized,
+	};
+	unless($writer->sqlInsert("dbaglog", $data)) {
+		print STDERR scalar(gmtime)." Failed to write to dbaglog for $ipid\n";
+	}
 }
 
 ##################################################################
