@@ -13822,7 +13822,7 @@ sub upgradeCoreDB() {
 			return 0;
 		}
 		print "Running: CREATE TABLE dbaglog (id INT UNSIGNED NOT NULL AUTO_INCREMENT, ts DATETIME NOT NULL DEFAULT NOW(), type VARCHAR(8) NOT NULL, ipid TEXT NOT NULL, type_id INT UNSIGNED NULL, comment TEXT NOT NULL, normalized TEXT NULL,PRIMARY KEY (id)) ENGINE=ndbcluster DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci\n";
-		if(!$self->sqlDo("CREATE TABLE dbagtext (id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+		if(!$self->sqlDo("CREATE TABLE dbaglog (id INT UNSIGNED NOT NULL AUTO_INCREMENT,
 						ts DATETIME NOT NULL DEFAULT NOW(),
 						type VARCHAR(8) NOT NULL,
 						ipid TEXT NOT NULL,
