@@ -13805,7 +13805,7 @@ sub upgradeCoreDB() {
 
 	if ($core_ver < 6) {
 		print "Upgrading Core to v6 ...\n";
-		print "Running: CREATE TABLE dbaglists (list_id INT UNSIGNED NOT NULL AUTO_INCREMENT, words TEXT NULL, enabled TINYINT(3) NOT NULL DEFAULT 0, PRIMARY KEY (list_id)) ENGINE=ndbcluster DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci\n"
+		print "Running: CREATE TABLE dbaglists (list_id INT UNSIGNED NOT NULL AUTO_INCREMENT, words TEXT NULL, enabled TINYINT(3) NOT NULL DEFAULT 0, PRIMARY KEY (list_id)) ENGINE=ndbcluster DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci\n";
 		if(!$self->sqlDo("CREATE TABLE dbaglists (list_id INT UNSIGNED NOT NULL AUTO_INCREMENT,
 						words TEXT NULL,
 						enabled TINYINT(3) NOT NULL DEFAULT 0,
@@ -13813,7 +13813,7 @@ sub upgradeCoreDB() {
 						ENGINE=ndbcluster DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci")) {
 			return 0;
 		}
-		print "Running: CREATE TABLE dbagtext (text_id INT UNSIGNED NOT NULL AUTO_INCREMENT, text TEXT NULL, enabled TINYINT(3) NOT NULL DEFAULT 0, PRIMARY KEY (text_id)) ENGINE=ndbcluster DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci\n"
+		print "Running: CREATE TABLE dbagtext (text_id INT UNSIGNED NOT NULL AUTO_INCREMENT, text TEXT NULL, enabled TINYINT(3) NOT NULL DEFAULT 0, PRIMARY KEY (text_id)) ENGINE=ndbcluster DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci\n";
 		if(!$self->sqlDo("CREATE TABLE dbagtext (text_id INT UNSIGNED NOT NULL AUTO_INCREMENT,
 						text TEXT NULL,
 						enabled TINYINT(3) NOT NULL DEFAULT 0,
