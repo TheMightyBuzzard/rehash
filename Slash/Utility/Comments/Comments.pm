@@ -1969,18 +1969,18 @@ sub checkDouchebaggery {
 			my $badcount = 0;
 			next unless (defined($badlist->{enabled}) && $badlist->{enabled} == 1);
 			my @badwords = split(/,/, lc($badlist->{words}));
-			my $threshold = sprintf( "%.0f", scalar(@$wordlist) * 2 / 3);
+			my $threshold = sprintf( "%.0f", scalar(@$badlist) * 2 / 3);
 			foreach my $badword (@badwords) {
 				if($badcount >= $threshold) {
-					_logDbag("list", $user->{ipid}, $badexample->{list_id}, $comment, $normalized);
+					_logDbag("list", $user->{ipid}, $badlist->{list_id}, $comment, $normalized);
 					return 1;
 				}
-				if(defined($words->{$badword}) && ($words->{$badword} == 1) {
+				if(defined($words->{$badword}) && ($words->{$badword} == 1)) {
 					$badcount++;
 				}
 			}
 			if($badcount >= $threshold) {
-				_logDbag("list", $user->{ipid}, $badexample->{list_id}, $comment, $normalized);
+				_logDbag("list", $user->{ipid}, $badlist->{list_id}, $comment, $normalized);
 				return 1;
 			}
 		}
