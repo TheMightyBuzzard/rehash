@@ -1997,13 +1997,14 @@ sub checkDouchebaggery {
 			next;
 		}
 		my @bechunks = $exampletext =~ /(.{1,32})/gs;
+		my $normalizedchunks = () = $normalized =~ /(.{1,32})/gs;
 		my ($badchunks, $checked) = (0, 0);
 		foreach my $chunk (@bechunks) {
-			if($badchunks > (scalar(@normalizedchunks) / 4) || $checked > ((scalar(@badchunks) * 3) / 4)) {
+			if($badchunks > (scalar(@bechunks) / 4) || $badchunks > (($normalizedchunks * 3) / 4)) {
 				_logDbag("text", $user->{ipid}, $badexample->{text_id}, $comment, $normalized);
 				return 1;
 	     	}
-			if($normalized =~ /\Q$chunk/is){
+			if($normalized =~ /\Q$chunk/s){
 	          	$badchunks++;
 	          	$checked++;
 	          	next;
@@ -2040,7 +2041,7 @@ sub _douchebaggeryNormalizeComment {
 	$sanitized =~ s/\h+/ /g;
 	$sanitized =~ s/^(?:\h|\v)+//;
 	$sanitized =~ s/(?:\h|\v)+$//;
-	return $sanitized;
+	return lc($sanitized);
 }
 
 sub _douchebaggeryStripUnicode {
